@@ -1,0 +1,139 @@
+buildscript {
+	ext {
+		springBootVersion = '2.1.3.RELEASE'
+		configServerVersion = '2.1.0.RELEASE'
+		springFoxVersion = '2.9.2'
+		lombokVersion = '1.18.20'
+		mapstructVersion = '1.3.0.Final'
+		logstashLogbackEncoderVersion = '4.11'
+		groovyVersion = '2.5.6'
+		spockGroovyVersion = '1.2-groovy-2.5'
+		spockReportsVersion = '1.6.1'
+		objenesisVersion = '3.0.1'
+	}
+	repositories {
+		mavenCentral()
+	}
+
+	dependencies {
+		classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: org.springframework.boot.gradle.plugin.SpringBootPlugin
+apply plugin: io.spring.gradle.dependencymanagement.DependencyManagementPlugin
+apply plugin: 'jacoco'
+apply plugin: 'checkstyle'
+apply plugin: 'codenarc'
+
+String imageVersion = System.getenv('IMAGE_TAG') ?: 'Local Build'
+
+repositories {
+	mavenCentral()
+}
+
+sourceSets {
+	gradleConfig {
+		groovy {
+			srcDir file('config')
+		}
+	}
+	componentTest {
+		groovy {
+			compileClasspath += main.output + test.output
+			runtimeClasspath += main.output + test.output
+			srcDir file('src/test-component/groovy')
+		}
+		resources.srcDir file('src/test-component/resources')
+	}
+}
+
+dependencies {
+	// spring-boot
+	compile "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+	compile "org.springframework.boot:spring-boot-devtools:${springBootVersion}"
+	compile "org.springframework.boot:spring-boot-starter-data-mongodb:${springBootVersion}"
+	// lombok
+	compile "org.projectlombok:lombok:${lombokVersion}"
+	annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+	// mapstruct
+	compile "org.mapstruct:mapstruct-jdk8:${mapstructVersion}"
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+	// logstash
+	compile("net.logstash.logback:logstash-logback-encoder:${logstashLogbackEncoderVersion}") {
+		exclude group: 'ch.qos.logback', module: 'logback-core'
+	}
+	compile "io.springfox:springfox-swagger-ui:${springFoxVersion}"
+	compile "io.springfox:springfox-swagger2:${springFoxVersion}"
+	// test
+	testCompile "org.codehaus.groovy:groovy-all:${groovyVersion}"
+	testCompile "org.objenesis:objenesis:${objenesisVersion}"
+	testCompile "org.codehaus.groovy:groovy-dateutil:${groovyVersion}"
+	testCompile "org.spockframework:spock-core:${spockGroovyVersion}"
+	testCompile("com.athaydes:spock-reports:${spockReportsVersion}") {
+		transitive = false // this avoids affecting your version of Groovy/Spock
+	}
+}
+
+configurations {
+	gradleConfigCompile.extendsFrom testCompile
+	componentTestCompile.extendsFrom testCompile
+	componentTestRuntime.extendsFrom testRuntime
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+tasks.withType(Test) {
+	reports {
+		html.destination file("${reporting.baseDir}/${name}")
+	}
+}
+
+task gradleConfig(type: Copy) {
+	from 'build.gradle'
+	from('config/gradle/service') {
+		include '**/*.gradle'
+	}
+	into 'config/tmp'
+	rename '(.*).gradle', '$1.groovy'
+}
+
+checkstyle {
+	toolVersion = '8.18'
+	ignoreFailures = false
+	maxWarnings = 0
+	configFile = file('config/checkstyle/checkstyle.xml')
+	sourceSets = [sourceSets.main, sourceSets.test]
+}
+
+codenarc {
+	toolVersion = '1.1'
+	ignoreFailures = false
+	maxPriority1Violations = 0
+	maxPriority2Violations = 0
+	maxPriority3Violations = 0
+	configFile = file('config/codenarc/ruleset.groovy')
+}
+
+codenarcGradleConfig.dependsOn gradleConfig
+check.dependsOn codenarcGradleConfig
+check.dependsOn codenarcComponentTest
+
+springBoot {
+	buildInfo {
+		properties {
+			additional = [
+					version: imageVersion,
+			]
+		}
+	}
+}
+
+bootRun {
+	systemProperties = System.properties
+}

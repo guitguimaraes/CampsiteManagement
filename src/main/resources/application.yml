@@ -1,0 +1,6 @@
+server:
+  port: 9080
+spring:
+  data:
+    mongodb:
+      database: booking
