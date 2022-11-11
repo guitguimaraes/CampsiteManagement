@@ -2,11 +2,12 @@ package com.campsiteManagement.service;
 
 import com.campsiteManagement.entity.Booking;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface BookingService {
 
-    List<Booking> getAvailableBooks();
+    List<LocalDate> getAvailableBooks(String startDate, String endDate);
 
     Booking addBooking(Booking booking);
 

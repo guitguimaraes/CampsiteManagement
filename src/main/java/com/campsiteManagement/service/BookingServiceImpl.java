@@ -5,6 +5,7 @@ import com.campsiteManagement.exception.BookingNotAvailableException;
 import com.campsiteManagement.exception.DateException;
 import com.campsiteManagement.exception.NotFoundException;
 import com.campsiteManagement.repository.BookingRepository;
+import com.campsiteManagement.util.DateRange;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,12 +23,11 @@ import java.util.Optional;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
-    private final EntityQueryService entityQueryService;
 
     @Override
     @Transactional
-    public List<Booking> getAvailableBooks() {
-        return null;
+    public List<LocalDate> getAvailableBooks(String startDate, String endDate) {
+        return getFreeLocalDate(LocalDate.parse(startDate), LocalDate.parse(endDate));
     }
 
     @Override
@@ -88,8 +89,25 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
+
+    private List<LocalDate> getFreeLocalDate(LocalDate startDate, LocalDate endDate){
+        DateRange dateRange = new DateRange(startDate,endDate);
+        List<LocalDate> localDates = dateRange.toList();
+        localDates.removeAll(getBookedListBetweenDays(startDate, endDate));
+        return localDates;
+    }
+
+    private List<LocalDate> getBookedListBetweenDays(LocalDate startDate, LocalDate endDate){
+        List<Booking> bookings = bookingRepository.findByEndDateBetweenOrStartDateBetween(startDate, endDate, startDate, endDate);
+        List<LocalDate> localDates = new ArrayList<>();
+        bookings.forEach(
+                booking -> localDates.addAll(new DateRange(booking.getStartDate(), booking.getEndDate()).toList())
+        );
+        return localDates;
+    }
+
     private boolean isFreeBooking(LocalDate startDate, LocalDate endDate) {
-        List<Booking> bookings = entityQueryService.findByStartDateEndDate(startDate, endDate);
+        List<Booking> bookings = bookingRepository.findByEndDateBetweenOrStartDateBetween(startDate, endDate, startDate, endDate);
         return bookings.isEmpty();
     }
 

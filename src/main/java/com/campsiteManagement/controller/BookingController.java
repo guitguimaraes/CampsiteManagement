@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import static net.logstash.logback.argument.StructuredArguments.kv;
 
 /**
@@ -28,6 +31,19 @@ import static net.logstash.logback.argument.StructuredArguments.kv;
 public class BookingController {
 
     private final BookingService bookingService;
+
+    @ApiOperation(value = "Get Available dates")
+    @ResponseStatus(HttpStatus.CREATED)
+    @GetMapping(value = "/{startDate}/{endDate}")
+    public List<LocalDate>  getAvailableDates(@PathVariable String startDate, @PathVariable String endDate) {
+        log.info("Received request to get Available Dates: {}, {}", kv("startDate", startDate), kv("endDate", endDate));
+
+        List<LocalDate> localDates = bookingService.getAvailableBooks(startDate, endDate);
+
+        log.info("Available dates returned with success");
+
+        return localDates;
+    }
 
     @ApiOperation(value = "Add new Booking")
     @ResponseStatus(HttpStatus.CREATED)
