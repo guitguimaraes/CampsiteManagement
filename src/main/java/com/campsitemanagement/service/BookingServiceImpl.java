@@ -47,7 +47,7 @@ public class BookingServiceImpl implements BookingService {
     public Booking addBooking(Booking booking) {
         validateDates(booking);
         if (isFreeBooking(booking.getStartDate(), booking.getEndDate())) {
-            return bookingRepository.save(booking);
+            return bookingRepository.insert(booking);
         } else {
             throw new BookingNotAvailableException("Booking Not available to this date.");
         }
