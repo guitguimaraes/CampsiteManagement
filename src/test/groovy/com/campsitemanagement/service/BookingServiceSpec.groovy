@@ -13,13 +13,12 @@ import java.time.LocalDate
 class BookingServiceSpec extends Specification {
 
     BookingRepository bookingRepository = Mock(BookingRepository)
-    CampsiteConfiguration campsiteConfiguration = createCampsiteConfiguration()
-    BookingService bookingService = new BookingServiceImpl(bookingRepository, campsiteConfiguration)
+    BookingService bookingService = new BookingServiceImpl(bookingRepository, generateCampsiteConfiguration())
 
     def 'Booking get with success'() {
         given: 'correct bookingId to delete'
 
-        Booking bookingDeleted = createBooking(3)
+        Booking bookingDeleted = generateBooking(3)
 
         1 * bookingRepository.findById('bookingId') >> Optional.of(bookingDeleted)
 
@@ -35,7 +34,6 @@ class BookingServiceSpec extends Specification {
     def 'Booking not found to get'() {
         given: 'incorrect bookingId to delete'
 
-
         1 * bookingRepository.findById('bookingId') >> Optional.empty()
 
         when:
@@ -50,7 +48,7 @@ class BookingServiceSpec extends Specification {
     def 'Booking insert with success'() {
         given: 'correct booking'
 
-        Booking bookingInsert = createBooking(3)
+        Booking bookingInsert = generateBooking(3)
 
         1 * bookingRepository.findByEndDateBetweenOrStartDateBetween(_, _, _, _) >> new ArrayList<Booking>()
         1 * bookingRepository.insert(bookingInsert) >> bookingInsert
@@ -71,8 +69,7 @@ class BookingServiceSpec extends Specification {
     def 'Booking insert with Date not available'() {
         given: 'correct booking'
 
-        Booking bookingInsert = createBooking(3)
-
+        Booking bookingInsert = generateBooking(3)
 
         def DatesList = [Mock(Booking), Mock(Booking)]
         1 * bookingRepository.findByEndDateBetweenOrStartDateBetween(_, _, _, _) >> DatesList
@@ -89,7 +86,7 @@ class BookingServiceSpec extends Specification {
     def 'Booking insert with startDate equals today'() {
         given: 'correct booking'
 
-        Booking bookingInsert = createBooking(3)
+        Booking bookingInsert = generateBooking(3)
         bookingInsert.startDate = LocalDate.now()
 
         when:
@@ -104,7 +101,7 @@ class BookingServiceSpec extends Specification {
     def 'Booking insert with date range higher than 3 '() {
         given: 'correct booking'
 
-        Booking bookingInsert = createBooking(3)
+        Booking bookingInsert = generateBooking(3)
         bookingInsert.startDate = LocalDate.now()
 
         when:
@@ -119,8 +116,8 @@ class BookingServiceSpec extends Specification {
     def 'Booking update with success'() {
         given: 'correct booking'
 
-        Booking bookingInsert = createBooking(3)
-        Booking bookingUpdate = createBooking(2)
+        Booking bookingInsert = generateBooking(3)
+        Booking bookingUpdate = generateBooking(2)
 
         1 * bookingRepository.findById('id') >> Optional.of(bookingInsert)
         1 * bookingRepository.findByEndDateBetweenOrStartDateBetween(_, _, _, _) >> new ArrayList<Booking>()
@@ -142,8 +139,8 @@ class BookingServiceSpec extends Specification {
     def 'Booking update fail date not available'() {
         given: 'correct booking'
 
-        Booking booking = createBooking(3)
-        Booking bookingUpdate = createBooking(2)
+        Booking booking = generateBooking(3)
+        Booking bookingUpdate = generateBooking(2)
         def DatesList = [Mock(Booking), Mock(Booking)]
 
         1 * bookingRepository.findById('id') >> Optional.of(booking)
@@ -161,8 +158,7 @@ class BookingServiceSpec extends Specification {
     def 'Booking update with Date not available'() {
         given: 'correct booking'
 
-        Booking bookingInsert = createBooking(3)
-
+        Booking bookingInsert = generateBooking(3)
 
         def DatesList = [Mock(Booking), Mock(Booking)]
         1 * bookingRepository.findByEndDateBetweenOrStartDateBetween(_, _, _, _) >> DatesList
@@ -179,7 +175,7 @@ class BookingServiceSpec extends Specification {
     def 'Booking update with startDate equals today'() {
         given: 'correct booking'
 
-        Booking booking = createBooking(3)
+        Booking booking = generateBooking(3)
         booking.startDate = LocalDate.now()
 
         when:
@@ -194,7 +190,7 @@ class BookingServiceSpec extends Specification {
     def 'Booking update with date range higher than 3 '() {
         given: 'correct booking'
 
-        Booking booking = createBooking(3)
+        Booking booking = generateBooking(3)
         booking.startDate = LocalDate.now()
 
         when:
@@ -209,7 +205,7 @@ class BookingServiceSpec extends Specification {
     def 'Booking delete with success'() {
         given: 'correct bookingId to delete'
 
-        Booking bookingDeleted = createBooking(3)
+        Booking bookingDeleted = generateBooking(3)
 
         1 * bookingRepository.findById('bookingId') >> Optional.of(bookingDeleted)
         1 * bookingRepository.delete(bookingDeleted)
@@ -226,7 +222,6 @@ class BookingServiceSpec extends Specification {
     def 'Booking not found to delete'() {
         given: 'incorrect bookingId to delete'
 
-
         1 * bookingRepository.findById('bookingId') >> Optional.empty()
 
         when:
@@ -238,9 +233,8 @@ class BookingServiceSpec extends Specification {
         thrown(NotFoundException)
     }
 
-
-    def createBooking(date) {
-        Booking booking = new Booking()
+    def generateBooking(date) {
+        def booking = new Booking()
         booking.id = 'id'
         booking.startDate = LocalDate.now().plusDays(1)
         booking.endDate = LocalDate.now().plusDays(date)
@@ -249,8 +243,8 @@ class BookingServiceSpec extends Specification {
         booking
     }
 
-    def createCampsiteConfiguration() {
-        CampsiteConfiguration campsiteConfiguration = new CampsiteConfiguration();
+    def generateCampsiteConfiguration() {
+        def campsiteConfiguration = new CampsiteConfiguration()
         campsiteConfiguration.maxDaysAhead = 30
         campsiteConfiguration.maxDaysBooking = 3
         campsiteConfiguration.minDaysAhead = 1

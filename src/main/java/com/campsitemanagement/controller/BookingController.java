@@ -77,6 +77,7 @@ public class BookingController {
 
         return localDates;
     }
+    
     /**
      * method responsible to add a book.
      * @param bookingRequestDto booking information to be added

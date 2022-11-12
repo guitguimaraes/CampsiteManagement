@@ -19,7 +19,7 @@ import java.time.LocalDate
 
 @Stepwise
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class BookingControllerIntegration extends Specification{
+class BookingControllerIntegration extends Specification {
 
     @LocalServerPort
     int port
@@ -44,8 +44,8 @@ class BookingControllerIntegration extends Specification{
     def "get dates available without add"() {
         given: 'booking dto '
 
-        String startDate = LocalDate.now().plusDays(1).toString()
-        String endDate = LocalDate.now().plusDays(15).toString()
+        String startDate = LocalDate.now().plusDays(1)
+        String endDate = LocalDate.now().plusDays(15)
 
         when: 'POST to create booking'
         Response response = requestSpecification
@@ -79,7 +79,7 @@ class BookingControllerIntegration extends Specification{
         response.statusCode == 400
 
         and: 'Should return message error'
-        response.body.as(ErrorResponseDto).message == "Start date need to be reserved minimum 1 day(s) ahead of arrival"
+        response.body.as(ErrorResponseDto).message == 'Start date need to be reserved minimum 1 day(s) ahead of arrival'
     }
 
     def "Booking create when call the correct endpoint'"() {
@@ -136,7 +136,7 @@ class BookingControllerIntegration extends Specification{
         response.statusCode == 404
 
         and: 'Should return message error'
-        response.body.as(ErrorResponseDto).message == "Booking not found"
+        response.body.as(ErrorResponseDto).message == 'Booking not found'
     }
 
     def "Booking create when call the correct endpoint to test dates"() {
@@ -204,14 +204,14 @@ class BookingControllerIntegration extends Specification{
         response.statusCode == 400
 
         and: 'Should return message error'
-        response.body.as(ErrorResponseDto).message == "Booking Not available to this date."
+        response.body.as(ErrorResponseDto).message == 'Booking Not available to this date.'
     }
 
     def "get dates available without the dates already created"() {
         given: 'booking dto '
 
-        String startDate = LocalDate.now().plusDays(1).toString()
-        String endDate = LocalDate.now().plusDays(15).toString()
+        String startDate = LocalDate.now().plusDays(1)
+        String endDate = LocalDate.now().plusDays(15)
 
         when: 'POST to create booking'
         Response response = requestSpecification
@@ -254,6 +254,6 @@ class BookingControllerIntegration extends Specification{
         response.statusCode == 404
 
         and: 'Should return message error'
-        response.body.as(ErrorResponseDto).message == "Booking not found"
+        response.body.as(ErrorResponseDto).message == 'Booking not found'
     }
 }
