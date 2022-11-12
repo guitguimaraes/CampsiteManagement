@@ -3,7 +3,7 @@ package com.campsitemanagement.controller;
 import com.campsitemanagement.dto.BookingRequestDto;
 import com.campsitemanagement.dto.BookingResponseDto;
 import com.campsitemanagement.entity.Booking;
-import com.campsitemanagement.mapper.CampsiteMapper;
+import com.campsitemanagement.mapper.BookingMapper;
 import com.campsitemanagement.service.BookingService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,10 +34,30 @@ import static net.logstash.logback.argument.StructuredArguments.kv;
 @RestController
 @Slf4j
 @Api(tags = "Booking Controller")
-@RequestMapping(path = "/v1/booking")
+@RequestMapping(path = "/booking/v1")
 @RequiredArgsConstructor
 public class BookingController {
     private final BookingService bookingService;
+
+    private final BookingMapper bookingMapper;
+
+    /**
+     * Method responsible to get a booking by id.
+     * @param bookingId - id to search the booking
+     * @return bookingResponse
+     */
+    @ApiOperation(value = "Get Booking by Id")
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(value = "/{bookingId}")
+    public BookingResponseDto getBookingById(@PathVariable String bookingId) {
+        log.info("Received request to get booking by ID: {}", kv("bookingId", bookingId));
+
+        Booking booking = bookingService.getBookingById(bookingId);
+
+        log.info("booking returned with success");
+
+        return bookingMapper.bookingToBookingResponseDto(booking);
+    }
 
     /**
      * Method responsible to get all available dates to book.
@@ -57,7 +77,6 @@ public class BookingController {
 
         return localDates;
     }
-
     /**
      * method responsible to add a book.
      * @param bookingRequestDto booking information to be added
@@ -69,11 +88,11 @@ public class BookingController {
     public BookingResponseDto addBooking(@Valid @RequestBody BookingRequestDto bookingRequestDto) {
         log.info("Received request to add booking: {}", kv("addBooking", bookingRequestDto));
 
-        final Booking booking = bookingService.addBooking(CampsiteMapper.bookingRequestDtoToBooking(bookingRequestDto));
+        final Booking booking = bookingService.addBooking(bookingMapper.bookingRequestDtoToBooking(bookingRequestDto));
 
         log.info("Booking {} added with success", kv("addedBooking", booking));
 
-        return CampsiteMapper.bookingTobookingResponseDto(booking);
+        return bookingMapper.bookingToBookingResponseDto(booking);
     }
 
     /**
@@ -88,11 +107,11 @@ public class BookingController {
     public BookingResponseDto updateBooking(@PathVariable String bookingId, @Valid @RequestBody BookingRequestDto bookingUpdateRequestDto) {
         log.info("Received request to update booking: {}", kv("updateBooking", bookingId));
 
-        final Booking booking = bookingService.updateBooking(bookingId, CampsiteMapper.bookingRequestDtoToBooking(bookingUpdateRequestDto));
+        final Booking booking = bookingService.updateBooking(bookingId, bookingMapper.bookingRequestDtoToBooking(bookingUpdateRequestDto));
 
         log.info("Booking {} updated with success", kv("updateBooking", booking));
 
-        return CampsiteMapper.bookingTobookingResponseDto(booking);
+        return bookingMapper.bookingToBookingResponseDto(booking);
     }
 
     /**

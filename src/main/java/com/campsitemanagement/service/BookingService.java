@@ -11,6 +11,13 @@ import java.util.List;
 public interface BookingService {
 
     /**
+     * method responsible to get booking by id.
+     * @param bookingId - id to search
+     * @return List LocalDate
+     */
+    Booking getBookingById(String bookingId);
+
+    /**
      * method responsible to get all available dates to book.
      * @param startDate - start date of the search
      * @param endDate - end date of the search

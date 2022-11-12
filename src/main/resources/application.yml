@@ -4,3 +4,7 @@ spring:
   data:
     mongodb:
       database: booking
+campsite:
+  maxDaysBooking: 3
+  minDaysAhead: 1
+  maxDaysAhead: 30

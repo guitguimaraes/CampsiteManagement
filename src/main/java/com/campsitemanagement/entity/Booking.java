@@ -14,7 +14,6 @@ import java.util.UUID;
  */
 @Document(collection = "Booking")
 @Data
-@Builder
 public class Booking {
 
     @Id

@@ -12,9 +12,9 @@ import java.time.LocalDate;
 @Data
 public class BookingRequestDto {
 
-    @ApiModelProperty(value = "Name")
-    @NotNull(message = "Name Can not be Null")
-    private String name;
+    @ApiModelProperty(value = "FullName")
+    @NotNull(message = "FullName Can not be Null")
+    private String fullName;
 
     @ApiModelProperty(value = "Email")
     @NotNull(message = "Email Can not be Null")
