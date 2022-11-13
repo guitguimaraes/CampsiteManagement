@@ -44,9 +44,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public List<LocalDate> getAvailableBooks(String startDate, String endDate) {
         try {
-            LocalDate startDateLocal = LocalDate.parse(startDate);
-            LocalDate endDateLocal = LocalDate.parse(endDate);
-            return getFreeLocalDate(startDateLocal, endDateLocal);
+            return getFreeDatesByRange(LocalDate.parse(startDate), LocalDate.parse(endDate));
         } catch (DateTimeParseException dtException) {
             throw new DateException("Date invalid");
         }
@@ -117,7 +115,7 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private List<LocalDate> getFreeLocalDate(LocalDate startDate, LocalDate endDate) {
+    private List<LocalDate> getFreeDatesByRange(LocalDate startDate, LocalDate endDate) {
         DateRange dateRange = new DateRange(startDate, endDate);
         List<LocalDate> localDates = dateRange.toList();
         localDates.removeAll(getBookedListBetweenDays(startDate, endDate));
